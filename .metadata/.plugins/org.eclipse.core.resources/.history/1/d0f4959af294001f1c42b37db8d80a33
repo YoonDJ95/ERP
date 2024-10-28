@@ -1,0 +1,20 @@
+package com.spring.sap;
+
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+public class HelloLombok {
+	private String hello;
+	private int lombok;
+
+    public static void main(String[] args) {
+        HelloLombok helloLombok = new HelloLombok();
+        ((Object) helloLombok).setHello("헬로");
+        ((Object) helloLombok).setLombok(5);
+
+        System.out.println(((Object) helloLombok).getHello());
+        System.out.println(((Object) helloLombok).getLombok());
+    }
+}

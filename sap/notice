@@ -1,0 +1,15 @@
+# 스프링 설치 경로
+https://spring.io/tools
+
+# 자바 설치 경로
+https://www.oracle.com/java/technologies/downloads/#jdk21-windows
+
+# 스프링부트롬북
+롬복(Lombok) 라이브러리는 소스 코드를 작성할 때 자바 클래스에 애너테이션을 사용하여 자주 쓰는 Getter 메서드, Setter 메서드, 생성자 등을 자동으로 만들어 주는 도구이다.
+https://projectlombok.org/download
+롬복부분 설정방법 : https://wikidocs.net/160444
+이클립스는 이 이후 해당 lombok.jar 파일을 관련 폴더에 넣고 Properties > Java Build Path > Libraries 의 클래스패스에 첨부해줘야함.
+
+# 깃허브 추적제외 명령어
+git add .gitignore
+git commit -m "Add .env to .gitignore"  < .env 파일을 제외에 추가함.
