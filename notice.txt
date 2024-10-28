@@ -3,6 +3,10 @@ VS Code 확장팩
 2. Extension Pack for Java
 3. Gradle for Java
 
+깃허브 추적제외 명령어
+git add .gitignore
+git commit -m "Add .env to .gitignore"  < .env 파일을 제외에 추가함.
+
 명령어
 ./gradlew bootRun : 애플리케이션 실행
 ./gradlew clean build : 클린 빌드 및 재동기화
