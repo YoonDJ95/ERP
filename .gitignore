@@ -1,0 +1,8 @@
+/.metadata/
+
+# Gradle 관련 파일
+*.class
+*.jar
+build/
+.gradle/
+.idea/
