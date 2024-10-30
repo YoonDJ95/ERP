@@ -1,0 +1,91 @@
+
+/* 기본 레이아웃 설정 */
+body {
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f9f9f9;
+}
+
+.container {
+    width: 80%;
+    margin: auto;
+    padding: 20px;
+}
+
+/* 대시보드 스타일 */
+.dashboard {
+    text-align: center;
+    padding: 50px 0;
+}
+
+.dashboard h1 {
+    font-size: 2.5em;
+    margin-bottom: 20px;
+}
+
+.dashboard .button-group {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 40px;
+}
+
+.button-group .button {
+    padding: 10px 20px;
+    font-size: 1em;
+    color: white;
+    background-color: #007bff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.button-group .button:hover {
+    background-color: #0056b3;
+}
+
+/* 표 스타일 */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+    font-size: 0.9em;
+    color: #333;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
+}
+
+th, td {
+    padding: 12px;
+    text-align: center;
+}
+
+th {
+    background-color: #f2f2f2;
+    font-weight: bold;
+}
+
+tr:nth-child(even) {
+    background-color: #f9f9f9;
+}
+
+/* 페이지 네비게이션 */
+.nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+.nav .page-link {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+.nav .page-link:hover {
+    color: #0056b3;
+}

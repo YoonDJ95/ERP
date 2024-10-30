@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>아이템 목록</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; margin-top: 30px; }
+        h1 { color: #333; }
+        table { width: 80%; margin: 20px auto; border-collapse: collapse; }
+        table, th, td { border: 1px solid #ddd; }
+        th, td { padding: 12px; text-align: center; }
+        th { background-color: #f2f2f2; }
+        tr:hover { background-color: #f5f5f5; }
+        a { margin-top: 20px; display: inline-block; color: #333; text-decoration: none; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>아이템 목록</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>이름</th>
+                <th>부품</th>
+                <th>제조사</th>
+                <th>가격</th>
+                <th>성능</th>
+            </tr>
+        </thead>
+        <tbody id="item-table-body">
+            <!-- JavaScript를 통해 데이터 채움 -->
+        </tbody>
+    </table>
+    <a href="/">홈으로 돌아가기</a>
+
+    <script>
+        // 데이터베이스에서 데이터를 불러와 테이블에 표시하는 JavaScript
+        fetch('/api/items/list')
+            .then(response => response.json())
+            .then(items => {
+                const tableBody = document.getElementById("item-table-body");
+                items.forEach(item => {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${item.id}</td>
+                        <td>${item.name}</td>
+                        <td>${item.parts}</td>
+                        <td>${item.maker}</td>
+                        <td>${item.price}</td>
+                        <td>${item.performance}</td>
+                    `;
+                    tableBody.appendChild(row);
+                });
+            })
+            .catch(error => console.error('아이템 목록을 가져오는 중 오류:', error));
+    </script>
+</body>
+</html>
