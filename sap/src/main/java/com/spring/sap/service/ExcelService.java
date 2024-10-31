@@ -17,6 +17,10 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID; // 추가해야 하는 import 문
+import java.util.HashMap;
+import java.util.Map;
+
 
 @Service
 @Transactional
@@ -66,7 +70,6 @@ public class ExcelService {
             try {
                 Item item = new Item();
                 item.setId(itemId);
-
                 item.setName(name);
                 item.setParts(parts);
                 item.setMaker(maker);
@@ -84,10 +87,18 @@ public class ExcelService {
         logger.info("Saved {} items to the database.", items.size());
     }
 
-    // Workbook에서 거래 데이터를 저장하는 메서드
+    
+ // Workbook에서 거래 데이터를 저장하는 메서드
     public void saveTransactionsFromWorkbook(Workbook workbook) {
         Sheet transactionSheet = workbook.getSheetAt(1);
         List<TransactionRecord> transactions = new ArrayList<>();
+
+        // 아이템 정보를 미리 로드
+        List<Item> items = itemRepository.findAll();
+        Map<String, Item> itemMap = new HashMap<>();
+        for (Item item : items) {
+            itemMap.put(item.getId(), item);
+        }
 
         for (Row row : transactionSheet) {
             if (row.getRowNum() == 0) continue; // 헤더 스킵
@@ -96,41 +107,53 @@ public class ExcelService {
             String itemId = getStringCellValue(row.getCell(1));
             LocalDate transactionDate = parseDate(row.getCell(2));
             String transactionType = getStringCellValue(row.getCell(3));
-            Double priceDouble = getNumericCellValue(row.getCell(4));
-            Double quantityDouble = getNumericCellValue(row.getCell(5));
-            Double totalPrice = getNumericCellValue(row.getCell(6));
+            
+            // 수량 및 총 가격 처리
+            Double quantityDouble = getNumericCellValue(row.getCell(4)); // purchase_quantity 또는 sell_quantity
+            Integer quantity = (quantityDouble != null) ? quantityDouble.intValue() : null; // null 체크 후 int 변환
 
-            if (transactionId == null || itemId == null || transactionDate == null || transactionType == null) {
+            // 총 가격 처리
+            Double totalPrice = getNumericCellValue(row.getCell(5)); // 총 가격 (total_price)
+
+            if (itemId == null || transactionDate == null || transactionType == null || quantity == null) {
                 logger.warn("Skipping row {}: Missing required transaction data", row.getRowNum());
                 continue;
             }
 
             try {
-            	Item item = itemRepository.findById(itemId).orElse(null);
-
+                Item item = itemMap.get(itemId);
                 if (item == null) {
                     logger.warn("Item with ID {} not found. Skipping row {}", itemId, row.getRowNum());
                     continue;
                 }
 
                 TransactionRecord transaction = new TransactionRecord();
+
+                // 유일한 transaction_id가 필요하다면 다음과 같이 생성
+                if (transactionId == null || transactionRecordRepository.existsById(transactionId)) {
+                    transactionId = "tr_" + UUID.randomUUID().toString(); // 새로운 ID 생성
+                }
+
                 transaction.setTransactionId(transactionId);
                 transaction.setItem(item);
                 transaction.setTransactionDate(transactionDate);
                 transaction.setTransactionType(transactionType);
-                transaction.setTotalPrice(totalPrice != null ? totalPrice : 0.0);
-
+                
+                // 거래 유형에 따라 가격 설정
                 if ("purchase".equalsIgnoreCase(transactionType)) {
-                    transaction.setPurchasePrice(priceDouble != null ? priceDouble : 0.0);
-                    transaction.setPurchaseQuantity(quantityDouble != null ? quantityDouble.intValue() : null);
+                    transaction.setPurchasePrice(item.getPurchasePrice());
+                    transaction.setPurchaseQuantity(quantity);
+                    totalPrice = item.getPurchasePrice() * quantity; // 구매 가격 곱하기 수량
                 } else if ("sale".equalsIgnoreCase(transactionType)) {
-                    transaction.setSellPrice(priceDouble != null ? priceDouble : 0.0);
-                    transaction.setSellQuantity(quantityDouble != null ? quantityDouble.intValue() : null);
+                    transaction.setSellPrice(item.getSellPrice());
+                    transaction.setSellQuantity(quantity);
+                    totalPrice = item.getSellPrice() * quantity; // 판매 가격 곱하기 수량
                 } else {
                     logger.warn("Unknown transaction type '{}' in row {}", transactionType, row.getRowNum());
                     continue;
                 }
 
+                transaction.setTotalPrice(totalPrice);
                 transactions.add(transaction);
             } catch (Exception e) {
                 logger.warn("Error parsing transaction row: {} at row {}", transactionId, row.getRowNum(), e);
@@ -144,6 +167,7 @@ public class ExcelService {
             logger.warn("No transactions to save.");
         }
     }
+
 
     private LocalDate parseDate(Cell cell) {
         if (cell == null) return null;

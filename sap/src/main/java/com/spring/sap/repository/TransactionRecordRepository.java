@@ -7,7 +7,7 @@ import org.springframework.data.repository.query.Param;
 
 import java.util.List;
 
-public interface TransactionRecordRepository extends JpaRepository<TransactionRecord, Long> {
+public interface TransactionRecordRepository extends JpaRepository<TransactionRecord,String> {
 
     // 거래 내역 필터링 메서드: 월, 부품, 제조사, 수익 여부에 따라 거래 내역 검색
     @Query("SELECT t FROM TransactionRecord t " +

@@ -116,27 +116,47 @@ public class PageController {
     public String addTransaction(@RequestParam String itemId,
                                  @RequestParam String transactionType,
                                  @RequestParam Integer quantity,
-                                 @RequestParam Double price,
                                  @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate transactionDate) {
-        Item item = itemRepository.findById(itemId).orElseThrow(() -> new IllegalArgumentException("Invalid Item ID"));
+        Item item = itemRepository.findById(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("Invalid Item ID"));
 
         TransactionRecord transaction = new TransactionRecord();
         transaction.setItem(item);
         transaction.setTransactionType(transactionType);
         transaction.setTransactionDate(transactionDate);
 
-        if ("purchase".equals(transactionType)) {
-            transaction.setPurchaseQuantity(quantity);
-            transaction.setPurchasePrice(item.getPurchasePrice());
-        } else if ("sale".equals(transactionType)) {
-            transaction.setSellQuantity(quantity);
-            transaction.setSellPrice(item.getSellPrice());
+        if (transactionType.equals("purchase")) {
+            if (item.getPurchasePrice() != null && quantity != null) {
+                transaction.setPurchaseQuantity(quantity);
+                transaction.setPurchasePrice(item.getPurchasePrice());
+                transaction.setTotalPrice(item.getPurchasePrice() * quantity);
+            } else {
+                // 로그를 추가하여 어떤 값이 NULL인지 확인
+                System.out.println("Purchase Price or Quantity is NULL for Item ID: " + itemId);
+            }
+        } else if (transactionType.equals("sale")) {
+            if (item.getSellPrice() != null && quantity != null) {
+                transaction.setSellQuantity(quantity);
+                transaction.setSellPrice(item.getSellPrice());
+                transaction.setTotalPrice(item.getSellPrice() * quantity);
+            } else {
+                // 로그를 추가하여 어떤 값이 NULL인지 확인
+                System.out.println("Sell Price or Quantity is NULL for Item ID: " + itemId);
+            }
         }
 
-        transaction.setTotalPrice(price * quantity); // 총 가격 설정
+
+        // 거래를 DB에 저장
+        System.out.println("Transaction Type: " + transactionType);
+        System.out.println("Quantity: " + quantity);
+        System.out.println("Purchase Price: " + item.getPurchasePrice());
+        System.out.println("Sell Price: " + item.getSellPrice());
+
         transactionRepository.save(transaction);
         return "redirect:/transaction_list";
     }
+
+
 
 
 
