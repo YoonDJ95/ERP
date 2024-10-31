@@ -17,16 +17,18 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID; // 추가해야 하는 import 문
 import java.util.HashMap;
 import java.util.Map;
 
-
+// Excel 파일을 처리하여 데이터베이스에 저장하는 서비스 클래스
 @Service
 @Transactional
 public class ExcelService {
 
+    // 로깅을 위한 Logger 설정
     private static final Logger logger = LoggerFactory.getLogger(ExcelService.class);
+
+    // 날짜 형식 설정 (yyyy-MM-dd 형식)
     private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Autowired
@@ -35,17 +37,23 @@ public class ExcelService {
     @Autowired
     private TransactionRecordRepository transactionRecordRepository;
 
-    // 전체 Excel 파일을 처리하는 메서드
+    /**
+     * 전체 Excel 파일을 처리하는 메서드
+     * @param inputStream Excel 파일의 InputStream
+     */
     public void processExcelData(InputStream inputStream) {
         try (Workbook workbook = WorkbookFactory.create(inputStream)) {
-            saveItemsFromWorkbook(workbook);
-            saveTransactionsFromWorkbook(workbook);
+            saveItemsFromWorkbook(workbook);         // 첫 번째 시트에서 아이템 데이터 저장
+            saveTransactionsFromWorkbook(workbook);  // 두 번째 시트에서 거래 데이터 저장
         } catch (Exception e) {
             logger.error("Error while processing Excel file", e);
         }
     }
 
-    // Workbook에서 아이템 데이터를 저장하는 메서드
+    /**
+     * Workbook에서 아이템 데이터를 저장하는 메서드 (첫 번째 시트)
+     * @param workbook 엑셀 파일의 Workbook 객체
+     */
     public void saveItemsFromWorkbook(Workbook workbook) {
         Sheet itemSheet = workbook.getSheetAt(0); // 첫 번째 시트로 접근
         List<Item> items = new ArrayList<>();
@@ -87,13 +95,15 @@ public class ExcelService {
         logger.info("Saved {} items to the database.", items.size());
     }
 
-    
- // Workbook에서 거래 데이터를 저장하는 메서드
+    /**
+     * Workbook에서 거래 데이터를 저장하는 메서드 (두 번째 시트)
+     * @param workbook 엑셀 파일의 Workbook 객체
+     */
     public void saveTransactionsFromWorkbook(Workbook workbook) {
         Sheet transactionSheet = workbook.getSheetAt(1);
         List<TransactionRecord> transactions = new ArrayList<>();
 
-        // 아이템 정보를 미리 로드
+        // 아이템 정보를 미리 로드하여 ID로 빠르게 조회할 수 있도록 Map에 저장
         List<Item> items = itemRepository.findAll();
         Map<String, Item> itemMap = new HashMap<>();
         for (Item item : items) {
@@ -103,18 +113,18 @@ public class ExcelService {
         for (Row row : transactionSheet) {
             if (row.getRowNum() == 0) continue; // 헤더 스킵
 
-            String transactionId = getStringCellValue(row.getCell(0));
             String itemId = getStringCellValue(row.getCell(1));
             LocalDate transactionDate = parseDate(row.getCell(2));
             String transactionType = getStringCellValue(row.getCell(3));
-            
-            // 수량 및 총 가격 처리
-            Double quantityDouble = getNumericCellValue(row.getCell(4)); // purchase_quantity 또는 sell_quantity
-            Integer quantity = (quantityDouble != null) ? quantityDouble.intValue() : null; // null 체크 후 int 변환
 
-            // 총 가격 처리
-            Double totalPrice = getNumericCellValue(row.getCell(5)); // 총 가격 (total_price)
+            // 수량 및 총 가격을 설정
+            Double quantityDouble = getNumericCellValue(row.getCell(4));
+            Integer quantity = (quantityDouble != null) ? quantityDouble.intValue() : null;
 
+            // 총 가격을 설정
+            Double totalPrice = getNumericCellValue(row.getCell(5));
+
+            // 필수 필드 체크
             if (itemId == null || transactionDate == null || transactionType == null || quantity == null) {
                 logger.warn("Skipping row {}: Missing required transaction data", row.getRowNum());
                 continue;
@@ -128,26 +138,19 @@ public class ExcelService {
                 }
 
                 TransactionRecord transaction = new TransactionRecord();
-
-                // 유일한 transaction_id가 필요하다면 다음과 같이 생성
-                if (transactionId == null || transactionRecordRepository.existsById(transactionId)) {
-                    transactionId = "tr_" + UUID.randomUUID().toString(); // 새로운 ID 생성
-                }
-
-                transaction.setTransactionId(transactionId);
                 transaction.setItem(item);
                 transaction.setTransactionDate(transactionDate);
                 transaction.setTransactionType(transactionType);
-                
-                // 거래 유형에 따라 가격 설정
+
+                // 거래 유형에 따라 가격 및 수량 설정
                 if ("purchase".equalsIgnoreCase(transactionType)) {
                     transaction.setPurchasePrice(item.getPurchasePrice());
                     transaction.setPurchaseQuantity(quantity);
-                    totalPrice = item.getPurchasePrice() * quantity; // 구매 가격 곱하기 수량
+                    totalPrice = item.getPurchasePrice() * quantity;
                 } else if ("sale".equalsIgnoreCase(transactionType)) {
                     transaction.setSellPrice(item.getSellPrice());
                     transaction.setSellQuantity(quantity);
-                    totalPrice = item.getSellPrice() * quantity; // 판매 가격 곱하기 수량
+                    totalPrice = item.getSellPrice() * quantity;
                 } else {
                     logger.warn("Unknown transaction type '{}' in row {}", transactionType, row.getRowNum());
                     continue;
@@ -156,7 +159,7 @@ public class ExcelService {
                 transaction.setTotalPrice(totalPrice);
                 transactions.add(transaction);
             } catch (Exception e) {
-                logger.warn("Error parsing transaction row: {} at row {}", transactionId, row.getRowNum(), e);
+                logger.warn("Error parsing transaction row at row {}", row.getRowNum(), e);
             }
         }
 
@@ -169,6 +172,11 @@ public class ExcelService {
     }
 
 
+    /**
+     * 날짜 셀을 LocalDate로 변환하는 메서드
+     * @param cell 날짜가 포함된 셀
+     * @return LocalDate 객체 (형식이 잘못된 경우 null)
+     */
     private LocalDate parseDate(Cell cell) {
         if (cell == null) return null;
         if (cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
@@ -183,6 +191,11 @@ public class ExcelService {
         }
     }
 
+    /**
+     * 셀에서 String 값을 추출하는 메서드
+     * @param cell 값이 포함된 셀
+     * @return 셀의 문자열 값 (null일 경우 null 반환)
+     */
     private String getStringCellValue(Cell cell) {
         if (cell == null) return null;
         return switch (cell.getCellType()) {
@@ -194,6 +207,11 @@ public class ExcelService {
         };
     }
 
+    /**
+     * 셀에서 Numeric 값을 추출하는 메서드
+     * @param cell 숫자 값이 포함된 셀
+     * @return 셀의 숫자 값 (null일 경우 null 반환)
+     */
     private Double getNumericCellValue(Cell cell) {
         if (cell == null) return null;
         return cell.getCellType() == CellType.NUMERIC ? cell.getNumericCellValue() : null;

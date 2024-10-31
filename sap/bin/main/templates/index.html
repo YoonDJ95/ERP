@@ -1,23 +1,32 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-    <link rel="stylesheet" href="styles.css">
     <meta charset="UTF-8">
     <title>ERP 대시보드</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin-top: 40px; text-align: center; }
-        .header { display: flex; justify-content: flex-end; padding: 20px; }
-        .header a { margin-left: 20px; font-size: 16px; color: #333; text-decoration: none; font-weight: bold; }
-        .header a:hover { color: #4CAF50; }
-        h1 { color: #333; font-size: 28px; }
-    </style>
+    <link rel="stylesheet" href="/css/index.css">
 </head>
 <body>
-    <div class="header">
-        <a href="/items">아이템 관리 시스템</a>
-		<a href="/stock_management">재고 관리 시스템</a>
-    </div>
-    <h1>ERP 대시보드</h1>
-    <!-- 차트 및 대시보드 주요 내용은 여기에 추가할 예정 -->
+    <header class="header">
+        <h1>ERP 대시보드</h1>
+        
+        <!-- 우측 상단 네비게이션 메뉴 -->
+        <nav class="top-nav">
+            <a href="/items" class="button-link">아이템 관리 시스템</a>
+            <a href="/stock_management" class="button-link">재고 관리 시스템</a>
+        </nav>
+    </header>
+
+    <!-- 차트 및 대시보드 영역 -->
+    <main class="dashboard-container">
+        <section class="chart-section">
+            <h2>차트 섹션</h2>
+            <div class="chart-placeholder">차트가 여기에 표시됩니다</div>
+        </section>
+        
+        <section class="dashboard-section">
+            <h2>대시보드 개요</h2>
+            <div class="dashboard-info">대시보드 관련 정보가 여기에 표시됩니다</div>
+        </section>
+    </main>
 </body>
 </html>

@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>재고 관리 시스템</title>
-    <link rel="stylesheet" href="styles.css">
-    <style>
-        /* 스타일 추가 */
-        body { font-family: Arial, sans-serif; text-align: center; margin-top: 100px; }
-        h1 { color: #333; font-size: 24px; }
-        a { display: block; margin: 20px; font-size: 18px; color: #333; text-decoration: none; font-weight: bold; }
-        a:hover { color: #4CAF50; }
-    </style>
+    <link rel="stylesheet" href="/css/stock_management.css">
 </head>
 <body>
-    <h1>재고 관리 시스템</h1>
-    <a href="/transaction_list">거래 목록 조회</a>
-    <a href="/manual_transaction">구매,판매 등록</a>
-    <a href="/">메인 페이지로 돌아가기</a>
+    <header class="header">
+        <!-- 홈으로 돌아가기 버튼 왼쪽 상단 -->
+        <a href="/" class="button-link home-button">홈으로 돌아가기</a>
+        <h1>재고 관리 시스템</h1>
+        <!-- 뒤로 가기 버튼 오른쪽 상단 -->
+        <a href="/previous_page" class="button-link back-button">뒤로 가기</a>
+    </header>
+    <nav class="nav-buttons">
+        <a href="/transaction_list" class="button-link">거래 목록 조회</a>
+        <a href="/manual_transaction" class="button-link">구매, 판매 등록</a>
+    </nav>
 </body>
 </html>

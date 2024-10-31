@@ -34,7 +34,8 @@ CREATE TABLE item (
 );
 
 CREATE TABLE transaction_record (
-    transaction_id VARCHAR(255) PRIMARY KEY,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    transaction_id VARCHAR(255) UNIQUE,
     item_id VARCHAR(255) NOT NULL,
     transaction_date DATE,
     transaction_type VARCHAR(50),
@@ -46,9 +47,11 @@ CREATE TABLE transaction_record (
     FOREIGN KEY (item_id) REFERENCES item(item_id) ON DELETE CASCADE
 );
 
-ALTER USER 'admin'@'localhost' IDENTIFIED BY '0000';
+-- 사용자 및 권한 설정
+CREATE USER 'admin'@'localhost' IDENTIFIED BY '0000';
 GRANT ALL PRIVILEGES ON itemlist.* TO 'admin'@'localhost';
 FLUSH PRIVILEGES;
+
 ----------------------
 
 # 깃허브 추적제외 명령어
