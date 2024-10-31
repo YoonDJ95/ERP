@@ -9,11 +9,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpStatus;
 
-import java.io.IOException;
+
+import java.io.InputStream;
 import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
 
 
 @RestController
@@ -28,15 +28,12 @@ public class ItemController {
 
     // 파일 업로드 및 데이터 저장
     @PostMapping("/upload")
-    public ResponseEntity<Map<String, String>> uploadFile(@RequestParam("file") MultipartFile file) {
-        Map<String, String> response = new HashMap<>();
-        try {
-            excelService.saveItemsFromExcel(file.getInputStream());
-            response.put("message", "파일이 업로드되고 데이터가 저장되었습니다.");
-            return ResponseEntity.ok(response);
-        } catch (IOException e) {
-            response.put("message", "오류 발생: " + e.getMessage());
-            return ResponseEntity.status(500).body(response);
+    public ResponseEntity<String> uploadItemsFromExcel(@RequestParam("file") MultipartFile file) {
+        try (InputStream inputStream = file.getInputStream()) {
+            excelService.processExcelData(inputStream); // Excel 데이터 처리
+            return new ResponseEntity<>("Excel file processed and items saved successfully!", HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>("Failed to process Excel file for items", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 

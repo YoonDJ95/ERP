@@ -9,6 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.transaction.annotation.Transactional;
+import org.apache.poi.ss.usermodel.DateUtil;
 
 import java.io.InputStream;
 import java.time.LocalDate;
@@ -17,9 +19,11 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Service
+@Transactional
 public class ExcelService {
 
     private static final Logger logger = LoggerFactory.getLogger(ExcelService.class);
+    private static final DateTimeFormatter DATE_FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd");
 
     @Autowired
     private ItemRepository itemRepository;
@@ -27,97 +31,131 @@ public class ExcelService {
     @Autowired
     private TransactionRecordRepository transactionRecordRepository;
 
-    // 엑셀 파일에서 아이템 데이터를 저장하는 메서드
-    public void saveItemsFromExcel(InputStream inputStream) {
+    // 전체 Excel 파일을 처리하는 메서드
+    public void processExcelData(InputStream inputStream) {
         try (Workbook workbook = WorkbookFactory.create(inputStream)) {
-            // 첫 번째 시트는 아이템 정보가 있는 시트로 가정합니다
-            Sheet itemSheet = workbook.getSheetAt(0);
-            List<Item> items = new ArrayList<>();
-
-            for (Row row : itemSheet) {
-                if (row.getRowNum() == 0) continue; // 헤더 스킵
-
-                String itemIdString = getStringCellValue(row.getCell(0)); // item_id
-                String name = getStringCellValue(row.getCell(1));   // 제품명
-                String parts = getStringCellValue(row.getCell(2));  // 부품명
-                String maker = getStringCellValue(row.getCell(3));  // 제조사
-                Double purchasePrice = getNumericCellValue(row.getCell(4)); // 매입 가격
-                Double sellPrice = parsePrice(getStringCellValue(row.getCell(5))); // 판매 가격 (쉼표 제거)
-                String performance = getStringCellValue(row.getCell(6));    // 성능
-
-                try {
-                    Long itemId = Long.parseLong(itemIdString.replaceAll("[^\\d]", ""));
-                    // 중복 검사 및 저장
-                    if (!itemRepository.existsById(itemId)) {
-                        Item item = new Item();
-                        item.setId(itemId);
-                        item.setName(name);
-                        item.setParts(parts);
-                        item.setMaker(maker);
-                        item.setPurchasePrice(purchasePrice);
-                        item.setSellPrice(sellPrice);
-                        item.setPerformance(performance);
-
-                        items.add(item);
-                    }
-                } catch (NumberFormatException e) {
-                    logger.warn("Invalid item ID format: " + itemIdString);
-                }
-            }
-
-            itemRepository.saveAll(items); // 중복되지 않은 항목들만 저장
+            saveItemsFromWorkbook(workbook);
+            saveTransactionsFromWorkbook(workbook);
         } catch (Exception e) {
             logger.error("Error while processing Excel file", e);
         }
     }
 
-    // 엑셀 파일에서 거래 데이터를 저장하는 메서드
-    public void saveTransactionsFromExcel(InputStream inputStream) {
-        try (Workbook workbook = WorkbookFactory.create(inputStream)) {
-            // 두 번째 시트는 거래 정보가 있는 시트로 가정합니다
-            Sheet transactionSheet = workbook.getSheetAt(1);
-            List<TransactionRecord> transactions = new ArrayList<>();
-            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+    // Workbook에서 아이템 데이터를 저장하는 메서드
+    public void saveItemsFromWorkbook(Workbook workbook) {
+        Sheet itemSheet = workbook.getSheetAt(0); // 첫 번째 시트로 접근
+        List<Item> items = new ArrayList<>();
 
-            for (Row row : transactionSheet) {
-                if (row.getRowNum() == 0) continue; // 헤더 스킵
+        for (Row row : itemSheet) {
+            if (row.getRowNum() == 0) continue; // 헤더 스킵
 
-                String transactionIdString = getStringCellValue(row.getCell(0)); // transaction_id
-                String itemIdString = getStringCellValue(row.getCell(1));        // item_id
-                String transactionDateString = getStringCellValue(row.getCell(2)); // 거래 날짜
-                String transactionType = getStringCellValue(row.getCell(3));      // 거래 유형
-                Double quantityDouble = getNumericCellValue(row.getCell(4));      // 거래 수량
-                Integer quantity = (quantityDouble != null) ? quantityDouble.intValue() : 0;
-                Double totalPrice = getNumericCellValue(row.getCell(5));          // 총 거래 가격
+            String itemId = getStringCellValue(row.getCell(0));
+            String name = getStringCellValue(row.getCell(1));
+            String parts = getStringCellValue(row.getCell(2));
+            String maker = getStringCellValue(row.getCell(3));
+            Double purchasePrice = getNumericCellValue(row.getCell(4));
+            Double sellPrice = getNumericCellValue(row.getCell(5));
+            String performance = getStringCellValue(row.getCell(6));
 
-                try {
-                    Long itemId = Long.parseLong(itemIdString.replaceAll("[^\\d]", ""));
-                    LocalDate transactionDate = LocalDate.parse(transactionDateString, formatter);
-
-                    // 해당 itemId에 대한 Item을 조회
-                    Item item = itemRepository.findById(itemId).orElse(null);
-                    if (item == null) continue; // item이 없는 경우 스킵
-
-                    // 새로운 TransactionRecord 객체 생성 및 설정
-                    TransactionRecord transaction = new TransactionRecord();
-                    transaction.setTransactionId(transactionIdString);
-                    transaction.setItem(item);
-                    transaction.setTransactionDate(transactionDate);
-                    transaction.setTransactionType(transactionType);
-                    transaction.setQuantity(quantity);
-                    transaction.setTotalPrice(totalPrice);
-
-                    transactions.add(transaction);
-                } catch (NumberFormatException e) {
-                    logger.warn("Invalid ID format: transactionId=" + transactionIdString + ", itemId=" + itemIdString);
-                } catch (Exception e) {
-                    logger.warn("Error parsing transaction row", e);
-                }
+            // 필수 데이터 유효성 검사
+            if (itemId == null || name == null || maker == null) {
+                logger.warn("Skipping row {}: Missing required data (ID, Name, or Maker)", row.getRowNum());
+                continue;
             }
 
-            transactionRecordRepository.saveAll(transactions); // 모든 거래 항목 저장
-        } catch (Exception e) {
-            logger.error("Error while processing Excel file", e);
+            try {
+                Item item = new Item();
+                item.setId(itemId);
+
+                item.setName(name);
+                item.setParts(parts);
+                item.setMaker(maker);
+                item.setPurchasePrice(purchasePrice != null ? purchasePrice : 0.0);
+                item.setSellPrice(sellPrice != null ? sellPrice : 0.0);
+                item.setPerformance(performance);
+
+                items.add(item);
+            } catch (Exception e) {
+                logger.warn("Error processing item row: " + row.getRowNum(), e);
+            }
+        }
+
+        itemRepository.saveAll(items);
+        logger.info("Saved {} items to the database.", items.size());
+    }
+
+    // Workbook에서 거래 데이터를 저장하는 메서드
+    public void saveTransactionsFromWorkbook(Workbook workbook) {
+        Sheet transactionSheet = workbook.getSheetAt(1);
+        List<TransactionRecord> transactions = new ArrayList<>();
+
+        for (Row row : transactionSheet) {
+            if (row.getRowNum() == 0) continue; // 헤더 스킵
+
+            String transactionId = getStringCellValue(row.getCell(0));
+            String itemId = getStringCellValue(row.getCell(1));
+            LocalDate transactionDate = parseDate(row.getCell(2));
+            String transactionType = getStringCellValue(row.getCell(3));
+            Double priceDouble = getNumericCellValue(row.getCell(4));
+            Double quantityDouble = getNumericCellValue(row.getCell(5));
+            Double totalPrice = getNumericCellValue(row.getCell(6));
+
+            if (transactionId == null || itemId == null || transactionDate == null || transactionType == null) {
+                logger.warn("Skipping row {}: Missing required transaction data", row.getRowNum());
+                continue;
+            }
+
+            try {
+            	Item item = itemRepository.findById(itemId).orElse(null);
+
+                if (item == null) {
+                    logger.warn("Item with ID {} not found. Skipping row {}", itemId, row.getRowNum());
+                    continue;
+                }
+
+                TransactionRecord transaction = new TransactionRecord();
+                transaction.setTransactionId(transactionId);
+                transaction.setItem(item);
+                transaction.setTransactionDate(transactionDate);
+                transaction.setTransactionType(transactionType);
+                transaction.setTotalPrice(totalPrice != null ? totalPrice : 0.0);
+
+                if ("purchase".equalsIgnoreCase(transactionType)) {
+                    transaction.setPurchasePrice(priceDouble != null ? priceDouble : 0.0);
+                    transaction.setPurchaseQuantity(quantityDouble != null ? quantityDouble.intValue() : null);
+                } else if ("sale".equalsIgnoreCase(transactionType)) {
+                    transaction.setSellPrice(priceDouble != null ? priceDouble : 0.0);
+                    transaction.setSellQuantity(quantityDouble != null ? quantityDouble.intValue() : null);
+                } else {
+                    logger.warn("Unknown transaction type '{}' in row {}", transactionType, row.getRowNum());
+                    continue;
+                }
+
+                transactions.add(transaction);
+            } catch (Exception e) {
+                logger.warn("Error parsing transaction row: {} at row {}", transactionId, row.getRowNum(), e);
+            }
+        }
+
+        if (!transactions.isEmpty()) {
+            transactionRecordRepository.saveAll(transactions);
+            logger.info("Saved {} transactions to the database.", transactions.size());
+        } else {
+            logger.warn("No transactions to save.");
+        }
+    }
+
+    private LocalDate parseDate(Cell cell) {
+        if (cell == null) return null;
+        if (cell.getCellType() == CellType.NUMERIC && DateUtil.isCellDateFormatted(cell)) {
+            return cell.getLocalDateTimeCellValue().toLocalDate();
+        } else {
+            try {
+                return LocalDate.parse(getStringCellValue(cell), DATE_FORMATTER);
+            } catch (Exception e) {
+                logger.warn("Invalid date format: {}", cell);
+                return null;
+            }
         }
     }
 
@@ -126,27 +164,14 @@ public class ExcelService {
         return switch (cell.getCellType()) {
             case STRING -> cell.getStringCellValue();
             case NUMERIC -> String.valueOf(cell.getNumericCellValue());
+            case BOOLEAN -> String.valueOf(cell.getBooleanCellValue());
+            case FORMULA -> cell.getCellFormula();
             default -> null;
         };
     }
 
     private Double getNumericCellValue(Cell cell) {
         if (cell == null) return null;
-        if (cell.getCellType() == CellType.NUMERIC) {
-            return cell.getNumericCellValue();
-        } else {
-            return null;
-        }
-    }
-
-    // 판매 가격 처리 (쉼표 제거 및 숫자 변환)
-    private Double parsePrice(String priceString) {
-        if (priceString == null) return null;
-        try {
-            return Double.parseDouble(priceString.replaceAll(",", ""));
-        } catch (NumberFormatException e) {
-            logger.warn("Invalid price format: " + priceString);
-            return null;
-        }
+        return cell.getCellType() == CellType.NUMERIC ? cell.getNumericCellValue() : null;
     }
 }

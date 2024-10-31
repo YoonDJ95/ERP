@@ -21,46 +21,47 @@ public class TransactionRecord {
     @ManyToOne
     @JoinColumn(name = "item_id", nullable = false)  // 외래 키 매핑
     private Item item;
-    
-    
-    @Column(name = "transaction_date")
+
+    @Column(name = "transaction_date", nullable = false)
     private LocalDate transactionDate;
 
-    @Column(name = "transaction_type")
-    private String transactionType;  // 거래 유형 (구매, 판매)
+    @Column(name = "transaction_type", nullable = false)
+    private String transactionType;
 
     @Column(name = "price")
-    private Double price;  // 거래 단가
+    private Double price;
 
     @Column(name = "quantity")
-    private Integer quantity;  // 거래 수량
+    private Integer quantity;
 
     @Column(name = "total_price")
-    private Double totalPrice;  // 총 거래 가격
+    private Double totalPrice;
 
+    // 매입 정보 필드들
     @Column(name = "purchase_price")
-    private Double purchasePrice;  // 매입 가격
-
-    @Column(name = "sell_price")
-    private Double sellPrice;  // 판매 가격
+    private Double purchasePrice;
 
     @Column(name = "purchase_quantity")
-    private Integer purchaseQuantity;  // 매입 수량
+    private Integer purchaseQuantity;
+
+    // 판매 정보 필드들
+    @Column(name = "sell_price")
+    private Double sellPrice;
 
     @Column(name = "sell_quantity")
-    private Integer sellQuantity;  // 판매 수량
+    private Integer sellQuantity;
 
     // 총 거래 가격 계산 메서드
-    public void calculateTotalPrice() {
+    public Double calculateTotalPrice() {
         this.totalPrice = (price != null && quantity != null) ? price * quantity : 0.0;
+        return this.totalPrice;
     }
 
     // 수익 계산 메서드 (판매 수익 - 매입 비용)
     public Double getProfit() {
         if (sellPrice != null && sellQuantity != null && purchasePrice != null && purchaseQuantity != null) {
             return (sellPrice * sellQuantity) - (purchasePrice * purchaseQuantity);
-        } else {
-            return 0.0;  // 필요한 값이 없을 경우 0.0으로 반환
         }
+        return 0.0;
     }
 }

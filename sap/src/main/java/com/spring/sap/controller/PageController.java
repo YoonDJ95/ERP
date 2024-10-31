@@ -14,9 +14,15 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.IOException;
 import java.util.List;
 import java.time.LocalDate;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+
+import java.io.InputStream;
+
+
 
 @Controller
 public class PageController {
@@ -59,15 +65,15 @@ public class PageController {
 
     // 파일 업로드 및 데이터 저장
     @PostMapping("/upload")
-    public String uploadFile(@RequestParam("file") MultipartFile file, Model model) {
-        try {
-            excelService.saveItemsFromExcel(file.getInputStream());
-            excelService.saveTransactionsFromExcel(file.getInputStream());
-            model.addAttribute("message", "파일 업로드 및 데이터 저장이 완료되었습니다.");
-        } catch (IOException e) {
-            model.addAttribute("message", "오류 발생: " + e.getMessage());
+    public ResponseEntity<String> uploadExcelFile(@RequestParam("file") MultipartFile file, Model model) {
+        try (InputStream inputStream = file.getInputStream()) {
+            excelService.processExcelData(inputStream); // Excel 데이터 처리
+            model.addAttribute("message", "Excel file processed successfully!");
+            return new ResponseEntity<>("Excel file processed successfully!", HttpStatus.OK);
+        } catch (Exception e) {
+            model.addAttribute("message", "Failed to process Excel file.");
+            return new ResponseEntity<>("Failed to process Excel file", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        return "upload";
     }
 
     // 재고 관리 페이지 이동
@@ -107,7 +113,7 @@ public class PageController {
 
     // 거래 추가
     @PostMapping("/addTransaction")
-    public String addTransaction(@RequestParam Long itemId,
+    public String addTransaction(@RequestParam String itemId,
                                  @RequestParam String transactionType,
                                  @RequestParam Integer quantity,
                                  @RequestParam Double price,

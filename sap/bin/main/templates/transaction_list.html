@@ -49,7 +49,7 @@
         </thead>
         <tbody>
             <tr th:each="transaction : ${transactions}">
-                <td th:text="${#dates.format(transaction.transactionDate, 'MM')}"></td> <!-- 월 -->
+				<td th:text="${#temporals.format(transaction.transactionDate, 'MM')}"></td> <!-- 월 -->
                 <td th:text="${transaction.item.name}"></td> <!-- 제품명 -->
                 <td th:text="${transaction.item.parts}"></td> <!-- 부품 -->
                 <td th:text="${transaction.item.maker}"></td> <!-- 제조사 -->

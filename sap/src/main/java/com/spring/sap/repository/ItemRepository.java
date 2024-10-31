@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 
 @Repository
-public interface ItemRepository extends JpaRepository<Item, Long> {
+public interface ItemRepository extends JpaRepository<Item, String> {
 
     // 이름과 제조사를 기반으로 특정 항목의 존재 여부를 확인
     boolean existsByNameAndMaker(String name, String maker);
