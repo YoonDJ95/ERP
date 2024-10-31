@@ -123,17 +123,29 @@ public class PageController {
         TransactionRecord transaction = new TransactionRecord();
         transaction.setItem(item);
         transaction.setTransactionType(transactionType);
-        transaction.setQuantity(quantity);
-        transaction.setTotalPrice(price * quantity);
         transaction.setTransactionDate(transactionDate);
 
+        if ("purchase".equals(transactionType)) {
+            transaction.setPurchaseQuantity(quantity);
+            transaction.setPurchasePrice(item.getPurchasePrice());
+        } else if ("sale".equals(transactionType)) {
+            transaction.setSellQuantity(quantity);
+            transaction.setSellPrice(item.getSellPrice());
+        }
+
+        transaction.setTotalPrice(price * quantity); // 총 가격 설정
         transactionRepository.save(transaction);
         return "redirect:/transaction_list";
     }
 
+
+
+
+
     // 아이템 목록 전체 삭제
     @PostMapping("/items/deleteAll")
     public String deleteAllItems() {
+    	transactionRepository.deleteAll();
         itemRepository.deleteAll();  // 데이터베이스의 모든 항목 삭제
         itemRepository.resetAutoIncrement();  // AUTO_INCREMENT 초기화
         return "redirect:/items/list";  // 삭제 후 아이템 목록 페이지로 리다이렉트

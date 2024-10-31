@@ -19,7 +19,7 @@ public class TransactionRecord {
     private String transactionId;
 
     @ManyToOne
-    @JoinColumn(name = "item_id", nullable = false)  // 외래 키 매핑
+    @JoinColumn(name = "item_id", nullable = false)
     private Item item;
 
     @Column(name = "transaction_date", nullable = false)
@@ -27,15 +27,6 @@ public class TransactionRecord {
 
     @Column(name = "transaction_type", nullable = false)
     private String transactionType;
-
-    @Column(name = "price")
-    private Double price;
-
-    @Column(name = "quantity")
-    private Integer quantity;
-
-    @Column(name = "total_price")
-    private Double totalPrice;
 
     // 매입 정보 필드들
     @Column(name = "purchase_price")
@@ -51,17 +42,24 @@ public class TransactionRecord {
     @Column(name = "sell_quantity")
     private Integer sellQuantity;
 
-    // 총 거래 가격 계산 메서드
-    public Double calculateTotalPrice() {
-        this.totalPrice = (price != null && quantity != null) ? price * quantity : 0.0;
-        return this.totalPrice;
+    @Column(name = "total_price")
+    private Double totalPrice;
+
+    // 수익 계산 메서드
+    public Double getProfit() {
+        double totalSellPrice = (sellPrice != null && sellQuantity != null) ? sellPrice * sellQuantity : 0.0;
+        double totalPurchasePrice = (purchasePrice != null && purchaseQuantity != null) ? purchasePrice * purchaseQuantity : 0.0;
+        return totalSellPrice - totalPurchasePrice;
     }
 
-    // 수익 계산 메서드 (판매 수익 - 매입 비용)
-    public Double getProfit() {
-        if (sellPrice != null && sellQuantity != null && purchasePrice != null && purchaseQuantity != null) {
-            return (sellPrice * sellQuantity) - (purchasePrice * purchaseQuantity);
+    // 총 거래 가격 계산 메서드
+    public void calculateTotalPrice() {
+        if ("purchase".equals(transactionType) && purchasePrice != null && purchaseQuantity != null) {
+            this.totalPrice = purchasePrice * purchaseQuantity; // 매입 가격에 매입량 곱하기
+        } else if ("sale".equals(transactionType) && sellPrice != null && sellQuantity != null) {
+            this.totalPrice = sellPrice * sellQuantity; // 판매 가격에 판매량 곱하기
+        } else {
+            this.totalPrice = 0.0; // 조건에 맞지 않으면 0으로 설정
         }
-        return 0.0;
     }
 }

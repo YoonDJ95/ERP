@@ -3,7 +3,6 @@ package com.spring.sap.entity;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import java.util.UUID;
 
 @Entity
 @Getter
@@ -12,7 +11,7 @@ public class Item {
 
     @Id
     @Column(name = "item_id")
-    private String id = UUID.randomUUID().toString(); // UUID로 ID 초기화
+    private String id; // String으로 ID 정의
 
     @Column(nullable = false)
     private String name;
@@ -30,6 +29,6 @@ public class Item {
 
     // 기본 생성자
     public Item() {
-        this.id = UUID.randomUUID().toString(); // 객체 생성 시 고유 ID 부여
+        // ID는 외부에서 설정되므로 기본 생성자는 비워두어도 됨
     }
 }

@@ -32,34 +32,35 @@
         </select>
         <button type="submit">필터 적용</button>
     </form>
-    
-    <table>
-        <thead>
-            <tr>
-                <th>월</th>
-                <th>제품명</th>
-                <th>부품</th>
-                <th>제조사</th>
-                <th>매입 가격</th>
-                <th>판매 가격</th>
-                <th>매입량</th>
-                <th>판매량</th>
-                <th>수익</th>
-            </tr>
-        </thead>
-        <tbody>
-            <tr th:each="transaction : ${transactions}">
-				<td th:text="${#temporals.format(transaction.transactionDate, 'MM')}"></td> <!-- 월 -->
-                <td th:text="${transaction.item.name}"></td> <!-- 제품명 -->
-                <td th:text="${transaction.item.parts}"></td> <!-- 부품 -->
-                <td th:text="${transaction.item.maker}"></td> <!-- 제조사 -->
-                <td th:text="${transaction.purchasePrice}"></td> <!-- 매입 가격 -->
-                <td th:text="${transaction.sellPrice}"></td> <!-- 판매 가격 -->
-                <td th:text="${transaction.purchaseQuantity}"></td> <!-- 매입량 -->
-                <td th:text="${transaction.sellQuantity}"></td> <!-- 판매량 -->
-                <td th:text="${transaction.getProfit()}"></td> <!-- 수익 -->
-            </tr>
-        </tbody>
-    </table>
+	<table>
+	    <thead>
+	        <tr>
+	            <th>월</th>
+	            <th>거래 ID</th> <!-- 거래 ID 출력 -->
+	            <th>제품명</th>
+	            <th>부품</th>
+	            <th>제조사</th>
+	            <th>매입 가격</th>
+	            <th>판매 가격</th>
+	            <th>매입량</th>
+	            <th>판매량</th>
+	            <th>수익</th>
+	        </tr>
+	    </thead>
+	    <tbody>
+	        <tr th:each="transaction : ${transactions}">
+	            <td th:text="${#temporals.format(transaction.transactionDate, 'MM')}"></td>
+	            <td th:text="${transaction.transactionId}"></td> <!-- 거래 ID 출력 -->
+	            <td th:text="${transaction.item.name}"></td>
+	            <td th:text="${transaction.item.parts}"></td>
+	            <td th:text="${transaction.item.maker}"></td>
+	            <td th:text="${transaction.item.purchasePrice}"></td> <!-- 매입 가격 -->
+	            <td th:text="${transaction.item.sellPrice}"></td> <!-- 판매 가격 -->
+	            <td th:text="${transaction.purchaseQuantity}"></td> <!-- 매입량 -->
+	            <td th:text="${transaction.sellQuantity}"></td> <!-- 판매량 -->
+	            <td th:text="${transaction.getProfit()}"></td> <!-- 수익 -->
+	        </tr>
+	    </tbody>
+	</table>
 </body>
 </html>
