@@ -8,7 +8,7 @@ import org.springframework.data.repository.query.Param;
 import java.util.List;
 
 // TransactionRecordRepository 인터페이스: TransactionRecord 엔티티에 대한 데이터베이스 액세스 기능을 제공
-public interface TransactionRecordRepository extends JpaRepository<TransactionRecord, String> {
+public interface TransactionRecordRepository extends JpaRepository<TransactionRecord, Long> {
 
     /**
      * 거래 내역을 특정 조건에 따라 필터링하여 검색하는 메서드
