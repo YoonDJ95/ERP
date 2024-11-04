@@ -1,6 +1,7 @@
 package com.spring.sap.controller;
 
 import com.spring.sap.entity.TransactionRecord;
+import com.spring.sap.service.TransactionRecordService;
 import com.spring.sap.repository.TransactionRecordRepository;
 import org.springframework.format.annotation.DateTimeFormat;
 import com.spring.sap.entity.Item;
@@ -125,18 +126,34 @@ public class PageController {
      * @param model 필터링된 거래 목록을 추가할 모델 객체
      * @return transaction_list 템플릿 이름
      */
+    @Autowired
+    private TransactionRecordService transactionRecordService;
+    
     @GetMapping("/items/filter")
     public String filterTransactions(
+            @RequestParam(name = "year", required = false) Integer year,
             @RequestParam(name = "month", required = false) Integer month,
             @RequestParam(name = "parts", required = false) String parts,
             @RequestParam(name = "maker", required = false) String maker,
             @RequestParam(name = "profitPositive", required = false) Boolean profitPositive,
             Model model) {
 
-        List<TransactionRecord> transactions = transactionRepository.findFilteredTransactions(month, parts, maker, profitPositive);
-        model.addAttribute("transactions", transactions);
+        List<TransactionRecord> filteredRecords = transactionRecordService.filterTransactions(year, month, parts, maker, profitPositive);
+        model.addAttribute("transactions", filteredRecords);
+        
+        // 선택한 필터 항목을 모델에 추가
+        model.addAttribute("selectedYear", year);
+        model.addAttribute("selectedMonth", month);
+        model.addAttribute("selectedParts", parts);
+        model.addAttribute("selectedMaker", maker);
+        model.addAttribute("selectedProfitPositive", profitPositive);
+
         return "transaction_list";
     }
+
+
+
+
 
     /**
      * 수동 거래 등록 페이지로 이동
@@ -201,6 +218,7 @@ public class PageController {
     @PostMapping("/items/deleteAll")
     public String deleteAllItems() {
         transactionRepository.deleteAll();
+        transactionRepository.resetAutoIncrement();
         itemRepository.deleteAll();
         itemRepository.resetAutoIncrement();
         return "redirect:/items/list";

@@ -14,25 +14,68 @@
         <a href="/stock_management" class="button-link back-button">뒤로 가기</a>
     </header>
     <main>
-        <form method="get" action="/items/filter" class="filter-form">
-            <label>월:</label>
-            <input type="number" name="month" min="1" max="12">
-            <label>부품:</label>
-            <input type="text" name="parts">
-            <label>제조사:</label>
-            <input type="text" name="maker">
-            <label>수익 여부:</label>
-            <select name="profitPositive">
-                <option value="">모두 보기</option>
-                <option value="true">수익</option>
-                <option value="false">손실</option>
-            </select>
-            <button type="submit" class="filter-button">필터 적용</button>
-        </form>
-
-        <table>
+		<form method="get" action="/items/filter" class="filter-form">
+		    <!-- 연도 선택 드롭다운 -->
+		    <label>연도:</label>
+		    <select name="year">
+		        <option value="" th:selected="${selectedYear == null}">선택하세요</option>
+		        <option value="2024" th:selected="${selectedYear == 2024}">2024</option>
+		        <option value="2023" th:selected="${selectedYear == 2023}">2023</option>
+		        <option value="2022" th:selected="${selectedYear == 2022}">2022</option>
+		    </select>
+		    
+		    <!-- 월 선택 드롭다운 -->
+		    <label>월:</label>
+		    <select name="month">
+		        <option value="" th:selected="${selectedMonth == null}">선택하세요</option>
+		        <option value="1" th:selected="${selectedMonth == 1}">1월</option>
+		        <option value="2" th:selected="${selectedMonth == 2}">2월</option>
+		        <option value="3" th:selected="${selectedMonth == 3}">3월</option>
+		        <option value="4" th:selected="${selectedMonth == 4}">4월</option>
+		        <option value="5" th:selected="${selectedMonth == 5}">5월</option>
+		        <option value="6" th:selected="${selectedMonth == 6}">6월</option>
+		        <option value="7" th:selected="${selectedMonth == 7}">7월</option>
+		        <option value="8" th:selected="${selectedMonth == 8}">8월</option>
+		        <option value="9" th:selected="${selectedMonth == 9}">9월</option>
+		        <option value="10" th:selected="${selectedMonth == 10}">10월</option>
+		        <option value="11" th:selected="${selectedMonth == 11}">11월</option>
+		        <option value="12" th:selected="${selectedMonth == 12}">12월</option>
+		    </select>
+		    
+		    <!-- 부품 선택 드롭다운 -->
+		    <label>부품:</label>
+		    <select name="parts">
+		        <option value="" th:selected="${selectedParts == null}">선택하세요</option>
+		        <option value="cpu" th:selected="${selectedParts == 'cpu'}">CPU</option>
+		        <option value="gpu" th:selected="${selectedParts == 'gpu'}">GPU</option>
+		        <option value="ram" th:selected="${selectedParts == 'ram'}">RAM</option>
+		        <option value="storage" th:selected="${selectedParts == 'storage'}">저장장치</option>
+		    </select>
+		    
+		    <!-- 제조사 선택 드롭다운 -->
+		    <label>제조사:</label>
+		    <select name="maker">
+		        <option value="" th:selected="${selectedMaker == null}">선택하세요</option>
+		        <option value="intel" th:selected="${selectedMaker == 'intel'}">Intel</option>
+		        <option value="amd" th:selected="${selectedMaker == 'amd'}">AMD</option>
+		        <option value="nvidia" th:selected="${selectedMaker == 'nvidia'}">NVIDIA</option>
+		        <option value="samsung" th:selected="${selectedMaker == 'samsung'}">Samsung</option>
+		    </select>
+		    
+		    <!-- 수익 여부 선택 드롭다운 -->
+		    <label>수익 여부:</label>
+		    <select name="profitPositive">
+		        <option value="" th:selected="${selectedProfitPositive == null}">모두 보기</option>
+		        <option value="true" th:selected="${selectedProfitPositive == true}">수익</option>
+		        <option value="false" th:selected="${selectedProfitPositive == false}">손실</option>
+		    </select>
+		    
+		    <button type="submit" class="filter-button">필터 적용</button>
+		</form>
+		<table>
             <thead>
                 <tr>
+					<th>연</th>
                     <th>월</th>
                     <th>거래 ID</th>
                     <th>제품명</th>
@@ -47,6 +90,7 @@
             </thead>
             <tbody>
             <tr th:each="transaction : ${transactions}">
+				<td th:text="${#temporals.format(transaction.transactionDate, 'yyyy')}"></td>
                 <td th:text="${#temporals.format(transaction.transactionDate, 'MM')}"></td>
                 <td th:text="${transaction.transactionId}"></td>
                 <td th:text="${transaction.item.name}"></td>

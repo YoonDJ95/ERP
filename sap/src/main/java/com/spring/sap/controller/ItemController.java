@@ -66,12 +66,13 @@ public class ItemController {
      */
     @GetMapping("/filter")
     public ResponseEntity<List<TransactionRecord>> filterTransactions(
+    		@RequestParam(required = false) Integer year,
             @RequestParam(required = false) Integer month,
             @RequestParam(required = false) String parts,
             @RequestParam(required = false) String maker,
             @RequestParam(required = false) Boolean profitPositive) {
 
-        List<TransactionRecord> transactions = itemService.getFilteredTransactions(month, parts, maker, profitPositive);
+        List<TransactionRecord> transactions = itemService.getFilteredTransactions(year, month, parts, maker, profitPositive);
         return ResponseEntity.ok(transactions);
     }
 

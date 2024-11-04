@@ -14,8 +14,17 @@ public class TransactionRecord {
 	@Id
     @GeneratedValue(strategy = GenerationType.IDENTITY) // id는 자동 증가
     private Long id;
-
+	
+	@Column(unique = true)
     private String transactionId;
+
+	@PostPersist
+	public void generateTransactionId() {
+	    if (transactionId == null) {
+	        transactionId = "tr_" + String.format("%05d", id);
+	    }
+	}
+
 
     // Item과의 다대일 관계를 정의하며, 필수 관계임
     @ManyToOne

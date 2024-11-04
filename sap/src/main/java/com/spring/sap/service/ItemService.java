@@ -23,7 +23,7 @@ public class ItemService {
      * @param profitPositive 수익 여부 (null일 경우 수익 필터링 안 함)
      * @return 필터 조건에 맞는 거래 목록 반환
      */
-    public List<TransactionRecord> getFilteredTransactions(Integer month, String parts, String maker, Boolean profitPositive) {
-        return transactionRepository.findFilteredTransactions(month, parts, maker, profitPositive);
+    public List<TransactionRecord> getFilteredTransactions(Integer year, Integer month, String parts, String maker, Boolean profitPositive) {
+        return transactionRepository.findFilteredTransactions(year, month, parts, maker, profitPositive);
     }
 }
