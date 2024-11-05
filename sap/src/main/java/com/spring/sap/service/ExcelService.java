@@ -43,12 +43,34 @@ public class ExcelService {
      */
     public void processExcelData(InputStream inputStream) {
         try (Workbook workbook = WorkbookFactory.create(inputStream)) {
+            // 기존 데이터 삭제 및 AUTO_INCREMENT 초기화
+            deleteAllData();
+
+            // 엑셀 파일에서 데이터를 읽어와서 저장
             saveItemsFromWorkbook(workbook);         // 첫 번째 시트에서 아이템 데이터 저장
             saveTransactionsFromWorkbook(workbook);  // 두 번째 시트에서 거래 데이터 저장
         } catch (Exception e) {
             logger.error("Error while processing Excel file", e);
         }
     }
+
+    // 기존 데이터를 삭제하고, AUTO_INCREMENT 값을 초기화하는 메서드
+    private void deleteAllData() {
+        // 거래 기록 삭제 (TransactionRecord 테이블이 아이템 테이블을 참조하므로 먼저 삭제)
+        transactionRecordRepository.deleteAll();
+        transactionRecordRepository.flush(); // 변경 사항을 즉시 데이터베이스에 반영
+
+        // 아이템 데이터 삭제
+        itemRepository.deleteAll();
+        itemRepository.flush(); // 변경 사항을 즉시 데이터베이스에 반영
+
+        // AUTO_INCREMENT 값 초기화
+        itemRepository.resetAutoIncrement();
+        transactionRecordRepository.resetAutoIncrement();
+
+        logger.info("기존 데이터를 모두 삭제하고 AUTO_INCREMENT 값을 초기화했습니다.");
+    }
+
 
     /**
      * Workbook에서 아이템 데이터를 저장하는 메서드 (첫 번째 시트)
@@ -165,6 +187,9 @@ public class ExcelService {
             }
         }
 
+        // 거래 데이터를 최신 순으로 정렬 (transactionDate 기준)
+        transactions.sort((a, b) -> b.getTransactionDate().compareTo(a.getTransactionDate()));
+
         if (!transactions.isEmpty()) {
             transactionRecordRepository.saveAll(transactions);
             logger.info("Saved {} transactions to the database.", transactions.size());
@@ -172,6 +197,7 @@ public class ExcelService {
             logger.warn("No transactions to save.");
         }
     }
+
 
 
 

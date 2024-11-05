@@ -58,16 +58,11 @@ public class TransactionRecord {
     @Column(name = "total_price")
     private Double totalPrice;
 
-    // 수익을 저장
-    @Column(name = "profit")
-    private Double profit;
-
-    // Entity가 persist되거나 update될 때 총 가격과 수익을 계산
+    // Entity가 persist되거나 update될 때 총 가격을 계산
     @PrePersist
     @PreUpdate
     public void calculateValues() {
         calculateTotalPrice();
-        calculateProfit();
     }
 
     /**
@@ -80,21 +75,6 @@ public class TransactionRecord {
             this.totalPrice = sellPrice * sellQuantity;
         } else {
             this.totalPrice = 0.0;
-        }
-    }
-
-    /**
-     * 수익을 계산하는 메서드
-     */
-    public void calculateProfit() {
-        if ("sale".equalsIgnoreCase(transactionType)) {
-            // 판매 거래인 경우: 총 판매 금액 - 총 구매 금액
-            double totalSellPrice = (sellPrice != null && sellQuantity != null) ? sellPrice * sellQuantity : 0.0;
-            double totalPurchasePrice = (purchasePrice != null && purchaseQuantity != null) ? purchasePrice * purchaseQuantity : 0.0;
-            this.profit = totalSellPrice - totalPurchasePrice;
-        } else {
-            // 구매 거래인 경우 수익은 발생하지 않음
-            this.profit = 0.0;
         }
     }
 }
