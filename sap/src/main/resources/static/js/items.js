@@ -67,3 +67,48 @@ function updateTable(items) {
         tableBody.appendChild(row);
     });
 }
+
+// 필터링 적용 함수
+function applyFilter() {
+    const name = document.getElementById("name").value.toLowerCase();
+    const parts = document.getElementById("parts").value;
+    const maker = document.getElementById("maker").value;
+    const performance = document.getElementById("performance").value.toLowerCase();
+
+    // 필터 조건에 맞는 아이템 필터링
+    const filteredItems = allItems.filter(item => {
+        return (!name || item.name.toLowerCase().includes(name)) &&
+               (!parts || item.parts === parts) &&
+               (!maker || item.maker === maker) &&
+               (!performance || item.performance.toLowerCase().includes(performance));
+    });
+
+    updateTable(filteredItems); // 필터링된 결과로 테이블 업데이트
+}
+
+// 필터 초기화 함수
+function resetFilters() {
+    document.getElementById("name").value = "";
+    document.getElementById("parts").value = "";
+    document.getElementById("maker").value = "";
+    document.getElementById("performance").value = "";
+    updateTable(allItems); // 초기화 시 전체 목록 표시
+}
+
+// 부품 선택 시 해당 부품의 제조사 목록 업데이트
+function updateMakers() {
+    const parts = document.getElementById("parts").value;
+    const makerSelect = document.getElementById("maker");
+
+    // 제조사 목록 초기화
+    makerSelect.innerHTML = '<option value="">선택하세요</option>';
+
+    if (parts && partsToMakers[parts]) {
+        partsToMakers[parts].forEach(maker => {
+            const option = document.createElement("option");
+            option.value = maker;
+            option.textContent = maker;
+            makerSelect.appendChild(option);
+        });
+    }
+}
