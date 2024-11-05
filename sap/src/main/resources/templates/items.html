@@ -22,27 +22,27 @@
 		<!-- Top 버튼 -->
 		<button onclick="scrollToTop()" id="topBtn">&#9650;</button>
         <!-- 필터링 폼 -->
-        <form class="filter-form" onsubmit="event.preventDefault(); applyFilter();">
-            <label>제품명:</label>
-            <input type="text" id="name" placeholder="제품명을 입력하세요">
-            
-            <label>부품명:</label>
-            <select id="parts" onchange="updateMakers()">
-                <option value="">선택하세요</option>
-            </select>
+		<form class="filter-form" onsubmit="event.preventDefault(); applyFilter();">
+		    <label>제품명:</label>
+		    <input type="text" id="name" placeholder="제품명을 입력하세요">
+		    
+		    <label>부품명:</label>
+		    <select id="parts" onchange="updateMakers()">
+		        <option value="">선택하세요</option>
+		    </select>
 
-            <label>제조사:</label>
-            <select id="maker">
-                <option value="">선택하세요</option>
-            </select>
+		    <label>제조사:</label>
+		    <select id="maker">
+		        <option value="">선택하세요</option>
+		    </select>
 
-            <label>성능:</label>
-            <input type="text" id="performance" placeholder="성능을 입력하세요">
+		    <label>성능:</label>
+		    <input type="text" id="performance" placeholder="성능을 입력하세요">
 
-            <button type="button" onclick="applyFilter()" class="filter-button">필터 적용</button>
-			<button type="button" onclick="resetFilters()" class="reset-button">초기화</button>
-        </form>
-        
+		    <!-- 필터 적용 버튼의 type을 submit으로 변경 -->
+		    <button type="submit" class="filter-button">필터 적용</button>
+		    <button type="button" onclick="resetFilters()" class="reset-button">초기화</button>
+		</form>        
         <!-- 아이템 목록 테이블 -->
         <table>
             <thead>
