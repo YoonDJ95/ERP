@@ -117,12 +117,9 @@ public class ExcelService {
             LocalDate transactionDate = parseDate(row.getCell(2));
             String transactionType = getStringCellValue(row.getCell(3));
 
-            // 수량 및 총 가격을 설정
+            // 수량 설정
             Double quantityDouble = getNumericCellValue(row.getCell(4));
             Integer quantity = (quantityDouble != null) ? quantityDouble.intValue() : null;
-
-            // 총 가격을 설정
-            Double totalPrice = getNumericCellValue(row.getCell(5));
 
             // 필수 필드 체크
             if (itemId == null || transactionDate == null || transactionType == null || quantity == null) {
@@ -137,18 +134,23 @@ public class ExcelService {
                     continue;
                 }
 
+                // TransactionRecord 객체 생성
                 TransactionRecord transaction = new TransactionRecord();
                 transaction.setItem(item);
                 transaction.setTransactionDate(transactionDate);
                 transaction.setTransactionType(transactionType);
 
+                // 아이템의 purchasePrice와 sellPrice를 그대로 가져옴
+                transaction.setPurchasePrice(item.getPurchasePrice());
+                transaction.setSellPrice(item.getSellPrice());
+
+                Double totalPrice;
+
                 // 거래 유형에 따라 가격 및 수량 설정
                 if ("purchase".equalsIgnoreCase(transactionType)) {
-                    transaction.setPurchasePrice(item.getPurchasePrice());
                     transaction.setPurchaseQuantity(quantity);
                     totalPrice = item.getPurchasePrice() * quantity;
                 } else if ("sale".equalsIgnoreCase(transactionType)) {
-                    transaction.setSellPrice(item.getSellPrice());
                     transaction.setSellQuantity(quantity);
                     totalPrice = item.getSellPrice() * quantity;
                 } else {
@@ -170,6 +172,7 @@ public class ExcelService {
             logger.warn("No transactions to save.");
         }
     }
+
 
 
     /**

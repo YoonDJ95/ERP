@@ -157,3 +157,20 @@ tr:nth-child(even) {
 .filter-button:hover {
     background-color: #45a049;
 }
+
+/* 필터 적용 버튼 스타일 */
+.reset-button {
+    padding: 8px 15px;
+    background-color: rgb(255, 128, 0);
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.reset-button:hover {
+    background-color: rgb(170, 55, 0);
+}
+

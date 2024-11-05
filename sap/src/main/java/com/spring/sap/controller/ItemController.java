@@ -1,7 +1,6 @@
 package com.spring.sap.controller;
 
 import com.spring.sap.entity.Item;
-import com.spring.sap.service.ItemService;
 import com.spring.sap.repository.ItemRepository;
 import com.spring.sap.service.ExcelService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,33 +50,6 @@ public class ItemController {
         return itemRepository.findAll();
     }
     
-    // 아이템 관련 비즈니스 로직 처리 서비스
-    @Autowired
-    private ItemService itemService;
-    
-    /**
-     * 필터 조건에 따라 거래 기록을 조회하는 메서드
-     * @param month 조회할 월 (optional)
-     * @param parts 부품명 (optional)
-     * @param maker 제조사 (optional)
-     * @param profitPositive 수익이 양수인지 여부 (optional)
-     * @return 필터링된 거래 기록 리스트
-     */
-    @GetMapping("/filter")
-    public ResponseEntity<List<Item>> filterItems(
-            @RequestParam(required = false) String name,
-            @RequestParam(required = false) String parts,
-            @RequestParam(required = false) String maker,
-            @RequestParam(required = false) Integer minPurchasePrice,
-            @RequestParam(required = false) Integer maxPurchasePrice,
-            @RequestParam(required = false) Integer minSellPrice,
-            @RequestParam(required = false) Integer maxSellPrice,
-            @RequestParam(required = false) String performance) {
-
-        List<Item> filteredItems = itemService.getFilteredItems(name, parts, maker, minPurchasePrice, maxPurchasePrice, minSellPrice, maxSellPrice, performance);
-        return ResponseEntity.ok(filteredItems);
-    }
-
     /**
      * 아이템 관리 페이지로 이동하는 메서드
      * @return items_home 템플릿을 반환
