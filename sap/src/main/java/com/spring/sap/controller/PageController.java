@@ -1,12 +1,9 @@
 package com.spring.sap.controller;
 
-import com.spring.sap.entity.TransactionRecord;
-import com.spring.sap.service.TransactionRecordService;
-import com.spring.sap.repository.TransactionRecordRepository;
+import com.spring.sap.entity.*;
+import com.spring.sap.service.*;
+import com.spring.sap.repository.*;
 import org.springframework.format.annotation.DateTimeFormat;
-import com.spring.sap.entity.Item;
-import com.spring.sap.repository.ItemRepository;
-import com.spring.sap.service.ExcelService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -128,8 +125,39 @@ public class PageController {
      */
     @Autowired
     private TransactionRecordService transactionRecordService;
-    
+    @Autowired
+    private ItemService itemService;
+
     @GetMapping("/items/filter")
+    public String filterItems(
+            @RequestParam(name = "name", required = false) String name,
+            @RequestParam(name = "parts", required = false) String parts,
+            @RequestParam(name = "maker", required = false) String maker,
+            @RequestParam(name = "minPurchasePrice", required = false) Integer minPurchasePrice,
+            @RequestParam(name = "maxPurchasePrice", required = false) Integer maxPurchasePrice,
+            @RequestParam(name = "minSellPrice", required = false) Integer minSellPrice,
+            @RequestParam(name = "maxSellPrice", required = false) Integer maxSellPrice,
+            @RequestParam(name = "performance", required = false) String performance,
+            Model model) {
+
+        List<Item> filteredItems = itemService.getFilteredItems(name, parts, maker, minPurchasePrice, maxPurchasePrice, minSellPrice, maxSellPrice, performance);
+        model.addAttribute("filteredItems", filteredItems);
+
+        model.addAttribute("selectedName", name);
+        model.addAttribute("selectedParts", parts);
+        model.addAttribute("selectedMaker", maker);
+        model.addAttribute("selectedMinPurchasePrice", minPurchasePrice);
+        model.addAttribute("selectedMaxPurchasePrice", maxPurchasePrice);
+        model.addAttribute("selectedMinSellPrice", minSellPrice);
+        model.addAttribute("selectedMaxSellPrice", maxSellPrice);
+        model.addAttribute("selectedPerformance", performance);
+
+        return "items";
+    }
+
+
+
+    @GetMapping("/transactions/filter")
     public String filterTransactions(
             @RequestParam(name = "year", required = false) Integer year,
             @RequestParam(name = "month", required = false) Integer month,
@@ -138,10 +166,11 @@ public class PageController {
             @RequestParam(name = "profitPositive", required = false) Boolean profitPositive,
             Model model) {
 
+        // 필터링된 거래 목록을 가져오기
         List<TransactionRecord> filteredRecords = transactionRecordService.filterTransactions(year, month, parts, maker, profitPositive);
         model.addAttribute("transactions", filteredRecords);
-        
-        // 선택한 필터 항목을 모델에 추가
+
+        // 선택한 필터 항목을 모델에 추가하여 뷰에서 유지
         model.addAttribute("selectedYear", year);
         model.addAttribute("selectedMonth", month);
         model.addAttribute("selectedParts", parts);

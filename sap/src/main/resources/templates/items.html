@@ -7,16 +7,51 @@
 </head>
 <body>
     <header class="header">
-        <!-- 홈으로 돌아가기 버튼 왼쪽 상단 -->
         <a href="/" class="button-link home-button">홈으로 돌아가기</a>
         <h1>아이템 목록</h1>
-        <!-- 전체 삭제 버튼 오른쪽 상단 -->
-		<a href="/items" class="button-link back-button">뒤로 가기</a>
+        <a href="/items" class="button-link back-button">뒤로 가기</a>
         <form action="/items/deleteAll" method="post" onsubmit="return confirm('모든 데이터를 삭제하시겠습니까?');" class="delete-form">
             <button type="submit" class="delete-button">전체 삭제</button>
         </form>
     </header>
+    
     <main>
+        <form method="get" action="/items/filter" class="filter-form">
+            <label>제품명:</label>
+            <input type="text" name="name" th:value="${selectedName}" placeholder="제품명을 입력하세요">
+            
+            <label>부품명:</label>
+            <select name="parts">
+                <option value="" th:selected="${selectedParts == null}">선택하세요</option>
+                <option value="cpu" th:selected="${selectedParts == 'cpu'}">CPU</option>
+                <option value="gpu" th:selected="${selectedParts == 'gpu'}">GPU</option>
+                <option value="ram" th:selected="${selectedParts == 'ram'}">RAM</option>
+                <option value="storage" th:selected="${selectedParts == 'storage'}">저장장치</option>
+            </select>
+
+            <label>제조사:</label>
+            <select name="maker">
+                <option value="" th:selected="${selectedMaker == null}">선택하세요</option>
+                <option value="intel" th:selected="${selectedMaker == 'intel'}">Intel</option>
+                <option value="amd" th:selected="${selectedMaker == 'amd'}">AMD</option>
+                <option value="nvidia" th:selected="${selectedMaker == 'nvidia'}">NVIDIA</option>
+                <option value="samsung" th:selected="${selectedMaker == 'samsung'}">Samsung</option>
+            </select>
+
+            <label>매입 가격:</label>
+            <input type="number" name="minPurchasePrice" placeholder="최소" th:value="${selectedMinPurchasePrice}">
+            <input type="number" name="maxPurchasePrice" placeholder="최대" th:value="${selectedMaxPurchasePrice}">
+
+            <label>판매 가격:</label>
+            <input type="number" name="minSellPrice" placeholder="최소" th:value="${selectedMinSellPrice}">
+            <input type="number" name="maxSellPrice" placeholder="최대" th:value="${selectedMaxSellPrice}">
+
+            <label>성능:</label>
+            <input type="text" name="performance" th:value="${selectedPerformance}" placeholder="성능을 입력하세요">
+
+            <button type="submit" class="filter-button">필터 적용</button>
+        </form>
+
         <table>
             <thead>
                 <tr>
@@ -30,7 +65,15 @@
                 </tr>
             </thead>
             <tbody id="item-table-body">
-                <!-- JavaScript로 데이터가 채워짐 -->
+                <tr th:each="item : ${filteredItems}">
+                    <td th:text="${item.id}"></td>
+                    <td th:text="${item.name}"></td>
+                    <td th:text="${item.parts}"></td>
+                    <td th:text="${item.maker}"></td>
+                    <td th:text="${item.purchasePrice}"></td>
+                    <td th:text="${item.sellPrice}"></td>
+                    <td th:text="${item.performance}"></td>
+                </tr>
             </tbody>
         </table>
     </main>

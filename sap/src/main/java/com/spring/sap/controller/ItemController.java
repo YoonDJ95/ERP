@@ -1,6 +1,5 @@
 package com.spring.sap.controller;
 
-import com.spring.sap.entity.TransactionRecord;
 import com.spring.sap.entity.Item;
 import com.spring.sap.service.ItemService;
 import com.spring.sap.repository.ItemRepository;
@@ -65,15 +64,18 @@ public class ItemController {
      * @return 필터링된 거래 기록 리스트
      */
     @GetMapping("/filter")
-    public ResponseEntity<List<TransactionRecord>> filterTransactions(
-    		@RequestParam(required = false) Integer year,
-            @RequestParam(required = false) Integer month,
+    public ResponseEntity<List<Item>> filterItems(
+            @RequestParam(required = false) String name,
             @RequestParam(required = false) String parts,
             @RequestParam(required = false) String maker,
-            @RequestParam(required = false) Boolean profitPositive) {
+            @RequestParam(required = false) Integer minPurchasePrice,
+            @RequestParam(required = false) Integer maxPurchasePrice,
+            @RequestParam(required = false) Integer minSellPrice,
+            @RequestParam(required = false) Integer maxSellPrice,
+            @RequestParam(required = false) String performance) {
 
-        List<TransactionRecord> transactions = itemService.getFilteredTransactions(year, month, parts, maker, profitPositive);
-        return ResponseEntity.ok(transactions);
+        List<Item> filteredItems = itemService.getFilteredItems(name, parts, maker, minPurchasePrice, maxPurchasePrice, minSellPrice, maxSellPrice, performance);
+        return ResponseEntity.ok(filteredItems);
     }
 
     /**
