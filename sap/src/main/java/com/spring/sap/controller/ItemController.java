@@ -42,6 +42,24 @@ public class ItemController {
     }
 
     /**
+     * 개별 아이템을 등록하는 메서드
+     * @param item 클라이언트에서 전송된 아이템 데이터
+     * @return 등록된 아이템과 HTTP 상태 코드
+     */
+    @PostMapping("/register")
+    public ResponseEntity<?> registerItem(@RequestBody Item item) {
+        if (item.getId() == null || item.getId().isEmpty()) {
+            return new ResponseEntity<>("ID 필드는 필수입니다.", HttpStatus.BAD_REQUEST);
+        }
+        
+        // 아이템 저장
+        Item savedItem = itemRepository.save(item);
+        return new ResponseEntity<>(savedItem, HttpStatus.CREATED);
+    }
+    
+    
+    
+    /**
      * 모든 아이템 목록을 조회하는 메서드
      * @return Item 엔티티 리스트
      */
