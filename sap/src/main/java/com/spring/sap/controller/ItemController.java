@@ -41,6 +41,19 @@ public class ItemController {
         }
     }
 
+    // V0.13 우영씨 코드
+    @RequestMapping(value = "/searchItems", method = {RequestMethod.GET, RequestMethod.POST})
+    @ResponseBody
+    public List<Item> searchItems(@RequestParam("keyword") String keyword) {
+        System.out.println("searchItems 요청 확인 - keyword: " + keyword);
+        
+        if (keyword == null || keyword.isEmpty()) {
+            return itemRepository.findAll(); // keyword가 비어있을 때 전체 제품 목록 반환
+        }
+        
+        return itemRepository.findByNameContainingIgnoreCase(keyword);
+    }
+    
     /**
      * 개별 아이템을 등록하는 메서드
      * @param item 클라이언트에서 전송된 아이템 데이터

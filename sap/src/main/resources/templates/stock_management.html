@@ -3,9 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <title>재고 관리 시스템</title>
-	<link rel="stylesheet" href="/css/all_layout.css">
+    <link rel="stylesheet" href="/css/all_layout.css">
     <link rel="stylesheet" href="/css/f_btn.css">
-	<link rel="stylesheet" href="/css/nav_btn.css">
+    <link rel="stylesheet" href="/css/nav_btn.css">
+	<link rel="stylesheet" href="/css/stock_management.css">
+	<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
 <body>
     <header class="header">
@@ -15,9 +17,42 @@
         <!-- 뒤로 가기 버튼 오른쪽 상단 -->
         <a href="/" class="button-link back-button">뒤로 가기</a>
     </header>
+    
     <nav class="nav-buttons">
         <a href="/transaction_list" class="button-link">거래 목록 조회</a>
-        <a href="/manual_transaction" class="button-link">구매, 판매 등록</a>
     </nav>
+    
+    <main>
+        <form action="/addTransaction" method="post" class="transaction-form">
+            <div class="form-group">
+                <label for="itemId">제품명 입력:</label>
+                <input type="text" id="itemId" name="itemId" placeholder="제품명 입력" autocomplete="off" onfocus="showRecentItems()" oninput="searchItems()">
+                <ul id="suggestions" class="suggestions-list"></ul> <!-- 검색 추천 목록 -->
+            </div>
+
+            <div class="form-group">
+                <label for="transactionDate">거래 날짜:</label>
+                <input type="date" id="transactionDate" name="transactionDate" required>
+            </div>
+
+            <div class="form-group">
+                <label for="transactionType">거래 유형:</label>
+                <select id="transactionType" name="transactionType" required>
+                    <option value="구매">구매</option>
+                    <option value="판매">판매</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="quantity">수량:</label>
+                <input type="number" id="quantity" name="quantity" required>
+            </div>
+
+            <button type="submit" class="submit-button">등록</button>
+			<button type="button" onclick="clearForm()" class="clear-button">입력 내용 지우기</button>
+			<p id="message" class="message-text"></p>
+        </form>
+    </main>
+	<script src="/js/stock_management.js"></script>
 </body>
 </html>

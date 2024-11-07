@@ -1,6 +1,7 @@
 package com.spring.sap.repository;
 
 import com.spring.sap.entity.Item;
+import java.util.List; // V0.13 우영씨 코드
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -10,6 +11,9 @@ import org.springframework.transaction.annotation.Transactional;
 @Repository
 public interface ItemRepository extends JpaRepository<Item, String> {
 
+	// V0.13 우영씨 코드
+	List<Item> findByNameContainingIgnoreCase(String keyword);
+	
     /**
      * 특정 이름과 제조사를 기반으로 아이템 존재 여부를 확인하는 메서드
      * @param name 아이템 이름

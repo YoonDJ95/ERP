@@ -10,9 +10,12 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.time.LocalDate;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -114,15 +117,7 @@ public class PageController {
         return "transaction_list";
     }
 
-    /**
-     * 수동 거래 등록 페이지로 이동
-     * @return manual_transaction 템플릿 이름
-     */
-    @GetMapping("/manual_transaction")
-    public String manualTransactionPage() {
-        return "manual_transaction";
-    }
-
+    // V0.13 우영씨 코드
     /**
      * 새로운 거래를 추가하고 저장
      * @param itemId 아이템 ID
@@ -132,13 +127,28 @@ public class PageController {
      * @return 거래 목록 페이지로 리다이렉트
      */
     @PostMapping("/addTransaction")
-    public String addTransaction(@RequestParam String itemId,
-                                 @RequestParam String transactionType,
-                                 @RequestParam Integer quantity,
-                                 @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate transactionDate) {
-        // Item을 조회
-        Item item = itemRepository.findById(itemId)
-                .orElseThrow(() -> new IllegalArgumentException("Invalid Item ID"));
+    @ResponseBody
+    public ResponseEntity<Map<String, String>> addTransaction(
+            @RequestParam("itemId") String itemName,
+            @RequestParam("transactionType") String transactionType,
+            @RequestParam("quantity") Integer quantity,
+            @RequestParam("transactionDate") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate transactionDate) {
+        
+        Map<String, String> response = new HashMap<>();
+        System.out.println("Received transaction request for itemName: " + itemName);
+
+        // 이름이 일치하는 Item 검색
+        List<Item> items = itemRepository.findByNameContainingIgnoreCase(itemName);
+        if (items.isEmpty()) {
+            System.out.println("Item not found for name: " + itemName);
+            response.put("message", "잘못된 제품 이름입니다.");
+            System.out.println("Returning error response: " + response);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
+        }
+
+        // 첫 번째 결과 사용
+        Item item = items.get(0);
+        System.out.println("Found item: " + item);
 
         // 새로운 거래 기록 생성 및 설정
         TransactionRecord transaction = new TransactionRecord();
@@ -146,29 +156,35 @@ public class PageController {
         transaction.setTransactionType(transactionType);
         transaction.setTransactionDate(transactionDate);
 
-        // 거래 유형에 따른 가격 및 수량 설정
-        if (transactionType.equals("purchase")) {
-            if (item.getPurchasePrice() != null && quantity != null) {
-                transaction.setPurchaseQuantity(quantity);
-                transaction.setPurchasePrice(item.getPurchasePrice());
-                transaction.setTotalPrice(item.getPurchasePrice() * quantity);
-            } else {
-                System.out.println("Purchase Price or Quantity is NULL for Item ID: " + itemId);
-            }
-        } else if (transactionType.equals("sale")) {
-            if (item.getSellPrice() != null && quantity != null) {
-                transaction.setSellQuantity(quantity);
-                transaction.setSellPrice(item.getSellPrice());
-                transaction.setTotalPrice(item.getSellPrice() * quantity);
-            } else {
-                System.out.println("Sell Price or Quantity is NULL for Item ID: " + itemId);
-            }
+        if ("구매".equals(transactionType) && item.getPurchasePrice() != null && quantity != null) {
+            transaction.setPurchaseQuantity(quantity);
+            transaction.setPurchasePrice(item.getPurchasePrice());
+            transaction.setTotalPrice(item.getPurchasePrice() * quantity);
+        } else if ("판매".equals(transactionType) && item.getSellPrice() != null && quantity != null) {
+            transaction.setSellQuantity(quantity);
+            transaction.setSellPrice(item.getSellPrice());
+            transaction.setTotalPrice(item.getSellPrice() * quantity);
         }
 
-        // 거래 정보를 DB에 저장
-        transactionRepository.save(transaction);
-        return "redirect:/transaction_list";
+        System.out.println("Saving transaction record for item: " + itemName);
+
+        try {
+            transactionRepository.save(transaction);
+        } catch (Exception e) {
+            System.out.println("Error saving transaction: " + e.getMessage());
+            response.put("message", "서버 오류로 인해 거래 등록에 실패했습니다.");
+            System.out.println("Returning error response: " + response);
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response);
+        }
+
+        // 성공적으로 등록된 경우 JSON 형태로 메시지 반환
+        response.put("message", "거래가 성공적으로 등록되었습니다.");
+        System.out.println("Returning success response: " + response); // 응답 데이터 확인
+        return ResponseEntity.ok(response);
     }
+
+
+
 
     /**
      * 아이템과 거래 목록을 전체 삭제하고 AUTO_INCREMENT 초기화

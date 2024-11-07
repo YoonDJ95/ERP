@@ -1,0 +1,122 @@
+/* 폼 스타일 */
+main {
+    display: flex;
+    justify-content: center;
+}
+
+form {
+    width: 300px;
+    padding: 20px;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    background-color: #fff;
+    box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.1);
+    text-align: left;
+}
+
+/* 라벨 및 입력 필드 스타일 */
+form label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: bold;
+    color: #4CAF50;
+}
+
+form input[type="text"],
+form input[type="date"],
+form input[type="number"],
+form select {
+    width: 100%;
+    padding: 10px;
+    margin-bottom: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-sizing: border-box;
+    font-size: 1em;
+}
+
+/* 제출 버튼 스타일 */
+.submit-button {
+    width: 100%;
+    padding: 10px;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    font-size: 1em;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.submit-button:hover {
+    background-color: #45a049;
+}
+
+.clear-button {
+    width: 100%;
+    padding: 12px;
+    background-color: #dc3545;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    font-size: 16px;
+    cursor: pointer;
+    margin-top: 10px;
+    text-align: center;
+}
+
+.clear-button:hover {
+    background-color: #c82333;
+}
+	
+
+/* 폼 스타일 */
+.transaction-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    max-width: 400px;
+    margin: 0 auto;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+}
+
+.form-group label {
+    margin-bottom: 0.2rem;
+    font-weight: bold;
+}
+
+
+/* 추천 목록 스타일 */
+.suggestions-list {
+    list-style-type: none;
+    padding: 0;
+    margin: 0;
+    border: 1px solid #ccc;
+    max-height: 150px;
+    overflow-y: auto;
+    display: none;
+    position: absolute;
+    background-color: white;
+    width: 300px;
+    top: 22%;
+}
+
+.suggestions-list li {
+    padding: 8px;
+    cursor: pointer;
+}
+
+.suggestions-list li:hover {
+    background-color: #eee;
+}
+
+/* 메시지 텍스트 스타일 */
+.message-text {
+    margin-top: 1rem;
+    font-weight: bold;
+}
