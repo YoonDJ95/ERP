@@ -160,10 +160,12 @@ public class PageController {
             transaction.setPurchaseQuantity(quantity);
             transaction.setPurchasePrice(item.getPurchasePrice());
             transaction.setTotalPrice(item.getPurchasePrice() * quantity);
+            transaction.setSellPrice(item.getSellPrice());
         } else if ("판매".equals(transactionType) && item.getSellPrice() != null && quantity != null) {
             transaction.setSellQuantity(quantity);
             transaction.setSellPrice(item.getSellPrice());
             transaction.setTotalPrice(item.getSellPrice() * quantity);
+            transaction.setPurchasePrice(item.getPurchasePrice());
         }
 
         System.out.println("Saving transaction record for item: " + itemName);

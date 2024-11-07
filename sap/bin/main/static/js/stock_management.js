@@ -75,19 +75,18 @@ document.addEventListener('DOMContentLoaded', function() {
 
     });
 
-    // 폼 초기화 함수
-    function clearForm() {
-        document.querySelector(".transaction-form").reset();
-        document.getElementById('suggestions').style.display = 'none';
-        document.getElementById('message').textContent = "";
-    }
-
     // 유효한 제품명인지 확인 (예: recentItems 배열에서 확인)
     function isItemValid(itemId) {
         return recentItems.includes(itemId);
     }
 });
 
+// 폼 초기화 함수
+    function clearForm() {
+        document.querySelector(".transaction-form").reset();
+        document.getElementById('suggestions').style.display = 'none';
+        document.getElementById('message').textContent = "";
+}
 // 최근 검색어 목록 표시
 function showRecentItems() {
     const suggestions = document.getElementById('suggestions');

@@ -106,22 +106,22 @@ function applyFilter() {
     const maker = document.getElementById("maker").value;
     const profitPositive = document.getElementById("profitPositive").value;
 
+    // 정렬 방식 라디오 버튼 상태 확인
+    const sortOrder = document.querySelector('input[name="sortOrder"]:checked').value;
+
     const filteredTransactions = transactions.filter(transaction => {
         const transactionYear = new Date(transaction.transactionDate).getFullYear().toString();
         const transactionMonth = (new Date(transaction.transactionDate).getMonth() + 1).toString();
 
-        // 필터 조건 설정
         const isYearMatch = year ? transactionYear === year : true;
         const isMonthMatch = month ? transactionMonth === month : true;
         const isPartMatch = parts ? transaction.item.parts === parts : true;
         const isMakerMatch = maker ? transaction.item.maker === maker : true;
 
-        // 수익 계산 (판매가 - 매입가)
         const profit = transaction.sellQuantity && transaction.sellPrice
             ? (transaction.sellPrice * transaction.sellQuantity) - (transaction.purchasePrice * transaction.purchaseQuantity || 0)
             : -((transaction.purchasePrice || 0) * (transaction.purchaseQuantity || 0));
 
-        // 수익 여부 필터링 조건 설정
         const isProfitMatch = profitPositive
             ? (profitPositive === 'true' && profit >= 0) || (profitPositive === 'false' && profit < 0)
             : true;
@@ -129,8 +129,16 @@ function applyFilter() {
         return isYearMatch && isMonthMatch && isPartMatch && isMakerMatch && isProfitMatch;
     });
 
-    updateTable(filteredTransactions);
+    // 정렬 로직 적용: 날짜 기준 정렬
+    filteredTransactions.sort((a, b) => {
+        const dateComparison = new Date(a.transactionDate) - new Date(b.transactionDate);
+        return sortOrder === "asc" ? dateComparison : -dateComparison;
+    });
+
+    updateTable(filteredTransactions); // 정렬 후 테이블 업데이트
 }
+
+
 
 
 // 필터링된 결과로 테이블 업데이트
@@ -178,5 +186,8 @@ function resetFilters() {
     document.getElementById("maker").innerHTML = '<option value="">선택하세요</option>';
     document.getElementById("profitPositive").value = "";
 
-    updateTable(transactions);
+    // 정렬 방식 라디오 버튼 초기화
+    document.querySelector('input[name="sortOrder"][value="asc"]').checked = true;
+
+    updateTable(transactions); // 원본 테이블 데이터로 업데이트
 }
