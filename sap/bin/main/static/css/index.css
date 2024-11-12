@@ -1,76 +1,83 @@
-/* 우측 상단 네비게이션 메뉴 */
-.top-nav {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    display: flex;
-    gap: 15px;
+/* 기본 스타일 초기화 */
+
+
+
+
+/* 테이블*/
+table {
+    width: 80%;
+    border-collapse: collapse;
+    margin: 20px auto;
+}
+th, td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+}
+th {
+    background-color: #f2f2f2;
 }
 
-/* 버튼 스타일 */
-.button-link {
-    padding: 10px 15px;
-    background-color: #4CAF50;
-    color: white;
-    border-radius: 5px;
-    text-decoration: none;
-    font-weight: bold;
-    transition: background-color 0.3s;
-    white-space: nowrap; /* 버튼 텍스트 줄바꿈 방지 */
+/*---------------------dashboard----------------------*/
+.dashcontainer {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f4f6f9;
 }
-
-.button-link:hover {
-    background-color: #45a049;
-}
-
-/* 대시보드 제목 스타일 */
-.header h1 {
-    font-size: 2.5em;
-    color: #333;
-    margin-bottom: 10px;
-    margin-top: 50px; /* 버튼과 제목 간격 확보 */
-}
-
-/* 대시보드 컨테이너 */
-.dashboard-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 20px;
-    padding: 30px;
-    margin-top: 20px;
-    background-color: #f9f9f9;
-    border-top: 2px solid #4CAF50;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* 차트 및 대시보드 섹션 스타일 */
-.chart-section, .dashboard-section {
-    width: 100%;
-    max-width: 800px;
+.container {
+    max-width: 1200px;
+    margin: 20px auto;
     padding: 20px;
-    background-color: #ffffff;
-    border-radius: 8px;
-    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
-
-/* 섹션 제목 스타일 */
-.chart-section h2, .dashboard-section h2 {
-    font-size: 1.8em;
-    color: #333;
-    margin-bottom: 15px;
-    border-bottom: 2px solid #4CAF50;
-    padding-bottom: 5px;
-}
-
-/* 차트와 대시보드 내용 영역 스타일 */
-.chart-placeholder, .dashboard-info {
+.dashboard-header {
     text-align: center;
-    color: #555;
-    font-size: 1.1em;
+    margin-bottom: 30px;
+}
+.tile {
+    background-color: #ffffff;
     padding: 20px;
-    background-color: #f4f7f9;
-    border: 1px dashed #ddd;
-    border-radius: 5px;
-    margin-top: 10px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
+}
+.tile h2 {
+    margin: 0;
+    font-size: 1.5em;
+}
+.tile p {
+    color: #888;
+    margin: 5px 0 0;
+}
+.tiles {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+.chart-container {
+    display: flex;
+    gap: 20px;
+    justify-content: space-between;
+    margin-bottom: 30px;
+}
+.chart {
+    background-color: #ffffff;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    flex: 1;
+}
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+th, td {
+    padding: 10px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+}
+th {
+    background-color: #f4f6f9;
 }
